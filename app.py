@@ -77,7 +77,19 @@ def create_app(test_config=None):
         return "data from pets table is {}".format(owners)
 
         # POST ROUTE - BRUNO
+    @app.route('/', methods=['POST'])
+    def addowner():
+        cur.execute("""INSERT INTO owner ("name") VALUES ('amir');""")
+        print("insert into owner table using cursor.fetchall")
+        conn.commit()
+        conn.close()
 
+    # @app.route('/', methods=['POST'])
+    # def addpet():
+    #     cur.execute("""INSERT INTO pet ("owner_id","name","breed","color","checked_in") VALUES (1,'Willow','cockapoo','yellow','no');""")
+    #     print("insert into pet table using cursor.fetchall")
+    #     conn.commit()
+    #     conn.close()
 
         # PUT ROUTE - AMIR
 
