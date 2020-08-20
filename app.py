@@ -61,7 +61,7 @@ def create_app(test_config=None):
     except OSError:
         pass
 
-#
+    # GET ROUTES - JOSH
     @app.route('/pets', methods=['GET'])
     def getpets():
         cur.execute("SELECT * FROM pet;")
@@ -76,5 +76,12 @@ def create_app(test_config=None):
         owners = cur.fetchall() 
         return "data from pets table is {}".format(owners)
 
+        # POST ROUTE - BRUNO
+
+
+        # PUT ROUTE - AMIR
+
+
+        # DELETE ROUTE - MASE
     
     return app
