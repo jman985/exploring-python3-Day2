@@ -1,6 +1,6 @@
 import os
 import psycopg2
-import requests
+# import requests
 from flask import Flask, jsonify
 
 # jsonify functions basically like json stringify, handling the responses from cursor
@@ -77,14 +77,14 @@ def create_app(test_config=None):
         return "data from pets table is {}".format(owners)
 
         # POST ROUTE - BRUNO
-    @app.route('/', methods=['POST'])
+    @app.route('/owner', methods=['POST'])
     def addowner():
-        cur.execute("""INSERT INTO owner ("name") VALUES ('amir');""")
+        cur.execute("INSERT INTO owner ('name') VALUES ('amir');")
         print("insert into owner table using cursor.fetchall")
         conn.commit()
         conn.close()
 
-    # @app.route('/', methods=['POST'])
+    # @app.route('/pet', methods=['POST'])
     # def addpet():
     #     cur.execute("""INSERT INTO pet ("owner_id","name","breed","color","checked_in") VALUES (1,'Willow','cockapoo','yellow','no');""")
     #     print("insert into pet table using cursor.fetchall")
@@ -92,8 +92,33 @@ def create_app(test_config=None):
     #     conn.close()
 
         # PUT ROUTE - AMIR
+    @app.route('/pets', methods=['UPDATE'])
+    def updatepet(pet_id):
+        cur.execute("UPDATE FROM pet WHERE id = %s;",(pet_id))
+        print("update from pet table using cursor.fetchall")
+        conn.commit()
+        conn.close()
 
+    @app.route('/owners', methods=['PUT'])
+    def updateowner(owner_id):
+        cur.execute("UPDATE FROM owners WHERE id = %s;",(owner_id))
+        print("update from owners table")
+        conn.commit()
+        conn.close()
 
-        # DELETE ROUTE - MASE
-    
+# DELETE ROUTES - MASE
+    @app.route('/owners', methods=['DELETE'])
+    def deleteowner(owner_id): # <------- Check param
+        cur.execute("DELETE FROM owner WHERE id = (%s);",(owner_id))
+        print("delete from owner table using cursor.fetchall")
+        conn.commit()
+        conn.close()
+
+    @app.route('/pets', methods=['DELETE'])
+    def deletepet(pet_id):
+        cur.execute("DELETE FROM pet WHERE id = (%s);",(pet_id))
+        print("delete from pet table using cursor.fetchall")
+        conn.commit()
+        conn.close()
+
     return app
