@@ -1,5 +1,7 @@
 import os
-import psycopg2
+import json
+import psycopg2 
+from psycopg2.extras import RealDictCursor
 # import requests
 from flask import Flask, jsonify
 
@@ -61,29 +63,49 @@ def create_app(test_config=None):
     except OSError:
         pass
 
+
+
     # GET ROUTES - JOSH
-    @app.route('/pets', methods=['GET'])
+    @app.route('/api/pet', methods=['GET'])
     def getpets():
-        cur.execute("SELECT * FROM pet;")
-        print("Selecting rows from mobile table using cursor.fetchall")
-        pets = cur.fetchall() 
-        return "data from pets table is {}".format(pets)
-        
-    @app.route('/owners', methods=['GET'])
+        try:
+            conn = psycopg2.connect(db)
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("""SELECT * FROM pet""")
+            
+            return json.dumps(cur.fetchall(), indent=2)
+        except (Exception, psycopg2.Error) as error:
+            print("Error getting pets", error)
+        finally:
+            cur.close()
+            conn.close()
+
+
+    @app.route('/api/owner', methods=['GET'])
     def getowners():
-        cur.execute("SELECT * FROM owner;")
-        print("Selecting rows from mobile table using cursor.fetchall")
-        owners = cur.fetchall() 
-        return "data from pets table is {}".format(owners)
+        try:
+            conn = psycopg2.connect(db)
+            cur = conn.cursor(cursor_factory=RealDictCursor)
+            cur.execute("""SELECT * FROM owner""")
+            
+            return json.dumps(cur.fetchall(), indent=2)
+        except (Exception, psycopg2.Error) as error:
+            print("Error getting pets", error)
+        finally:
+            cur.close()
+            conn.close()
+
+# request.get_json()
 
         # POST ROUTE - BRUNO
-    @app.route('/owner', methods=['POST'])
-    def addowner():
-        cur.execute("INSERT INTO owner ('name') VALUES ('amir');")
+    @app.route('/api/owner', methods=['POST'])
+    def addowner(id):
+        cur.execute("INSERT INTO owner (name) VALUES (%s);")
         print("insert into owner table using cursor.fetchall")
         conn.commit()
         conn.close()
-
+        return 'ok'
+        
     # @app.route('/pet', methods=['POST'])
     # def addpet():
     #     cur.execute("""INSERT INTO pet ("owner_id","name","breed","color","checked_in") VALUES (1,'Willow','cockapoo','yellow','no');""")
@@ -92,33 +114,38 @@ def create_app(test_config=None):
     #     conn.close()
 
         # PUT ROUTE - AMIR
+
     @app.route('/pets', methods=['UPDATE'])
     def updatepet(pet_id):
         cur.execute("UPDATE FROM pet WHERE id = %s;",(pet_id))
+#    postgres_insert_query = """ INSERT INTO mobile (ID, MODEL, PRICE) VALUES (%s,%s,%s)"""
+#    record_to_insert = (5, 'One Plus 6', 950)
         print("update from pet table using cursor.fetchall")
         conn.commit()
         conn.close()
 
-    @app.route('/owners', methods=['PUT'])
+    @app.route('/owner', methods=['PUT'])
     def updateowner(owner_id):
-        cur.execute("UPDATE FROM owners WHERE id = %s;",(owner_id))
-        print("update from owners table")
+        cur.execute("UPDATE FROM owner WHERE id = %s;",(owner_id))
+        print("update from owner table")
         conn.commit()
         conn.close()
 
 # DELETE ROUTES - MASE
-    @app.route('/owners', methods=['DELETE'])
-    def deleteowner(owner_id): # <------- Check param
-        cur.execute("DELETE FROM owner WHERE id = (%s);",(owner_id))
+    @app.route('/api/owner/<id>', methods=['DELETE'])
+    # 
+    def deleteowner(id): # <------- Check param
+        cur.execute("DELETE FROM owner WHERE id = (%s);",(id))
         print("delete from owner table using cursor.fetchall")
         conn.commit()
         conn.close()
 
-    @app.route('/pets', methods=['DELETE'])
+    @app.route('/api/pet/<id>', methods=['DELETE'])
     def deletepet(pet_id):
-        cur.execute("DELETE FROM pet WHERE id = (%s);",(pet_id))
+        cur.execute("DELETE FROM pet WHERE id = (%s);",(id))
         print("delete from pet table using cursor.fetchall")
         conn.commit()
         conn.close()
-
+        return 'OK'
+        
     return app
